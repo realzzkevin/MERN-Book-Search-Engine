@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
-import { getMe, deleteBook } from '../utils/API';
+//import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
+import { useMutation, useQuery } from '@apollo/client';
+import { REMOVE_BOOK } from '../utils/mutation';
+import { GET_ME } from '../utils/queries';
+
 const SavedBooks = () => {
+  //
+  const { loading, data } = useQuery(GET_ME);
+  const { removing, data } = useMutation(REMOVE_BOOK);
+
   const [userData, setUserData] = useState({});
 
   // use this to determine if `useEffect()` hook needs to run again
@@ -20,13 +28,15 @@ const SavedBooks = () => {
           return false;
         }
 
-        const response = await getMe(token);
+        /*const response = await getMe(token);
 
         if (!response.ok) {
           throw new Error('something went wrong!');
         }
 
         const user = await response.json();
+        */
+       const { data }
         setUserData(user);
       } catch (err) {
         console.error(err);
@@ -39,13 +49,13 @@ const SavedBooks = () => {
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-
+    // remove book
     if (!token) {
       return false;
     }
 
     try {
-      const response = await deleteBook(bookId, token);
+      /*const response = await deleteBook(bookId, token);
 
       if (!response.ok) {
         throw new Error('something went wrong!');
@@ -53,8 +63,10 @@ const SavedBooks = () => {
 
       const updatedUser = await response.json();
       setUserData(updatedUser);
+      */
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
+      const 
     } catch (err) {
       console.error(err);
     }

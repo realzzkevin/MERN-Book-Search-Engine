@@ -4,29 +4,30 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        me: async (parent, args) => {
-            const user = null;
-            const foundUser = await User.findOne({
-                $or: [{ _id: user ? user._id : args.id }, { username: args.username }],
-            })
+        me: async (parent, args, context) => {
+            if (context.user){
+                return User.findOne({
+                    $or:[{ _id: context.user ? user._id: context.user.id }, { username: context.username }],
+                });
+            }
 
-            return foundUser;
+            throw new AuthenticationError('Cannot find a user with this id!');
         }
     },
     Mutation: {
         login: async (parent, args) => {
             const user = await User.findOne({ $or: [{ username: args.username }, { email: args.email }] });
 
-            if (user) {
-                const isPwCorrect = await user.isCorrectPassword(args.password);
-                if (isPwCorrect) {
-                    const token = signToken(user);
-
-                    return { token, user };
-                }
+            if(!user) {
+                throw new AuthenticationError("can't find this user");
             }
 
-            return {};
+            const correctPw = await user.isCorrectPassword(args.password);
+            if (!correctPw){
+                throw new AuthenticationError("Wrong password");
+            }
+            const token = signToken(user);
+            return { token, user };
         },
 
         addUser: async ( parent, args ) => {
@@ -41,10 +42,11 @@ const resolvers = {
                 {$addToSet: { saveBooks: body}},
                 {new: true, runValidators: true}
             );
-            return updatedUser;
+            return updateUser;
         },
 
         removeBook: async ( parent, { user, params } ) => {
+            /////////////////////////////////////////////
             const updatedUser = await user.findOneAndUpdate(
                 {_id: user._id},
                 {$pull: { saveBooks: { bookId: params.bookId}}},
