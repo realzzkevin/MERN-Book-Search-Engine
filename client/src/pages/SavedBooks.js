@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
 //import { getMe, deleteBook } from '../utils/API';
@@ -11,13 +11,16 @@ import { REMOVE_BOOK } from '../utils/mutation';
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
 
-  const { loading, data } = useQuery(GET_ME);
-  setUserData(data);
+  const { loading, data }  = useQuery(GET_ME);
+  //setUserData(data);
+  if (!loading) {
+    setUserData(data);
+  }
 
-  const { removeBook, error, userdata} = useMutation(REMOVE_BOOK);
+  const [ removeBook, { error, updateData }] = useMutation(REMOVE_BOOK);
 
   // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
+  //const userDataLength = Object.keys(userData).length;
 
   /*useEffect(() => {
     const getUserData = async () => {
@@ -70,13 +73,13 @@ const SavedBooks = () => {
       setUserData(updatedUser);
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   // if data isn't here yet, say so
-  if (!userDataLength) {
+  if (/*!userDataLength*/loading) {
     return <h2>LOADING...</h2>;
   }
 

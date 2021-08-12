@@ -8,21 +8,22 @@ const resolvers = {
             if (context.user){
                 return User.findOne({
                     $or:[{ _id: context.user ? user._id: context.user.id }, { username: context.username }],
-                });
+                }).populate('books');
             }
 
             throw new AuthenticationError('Cannot find a user with this id!');
         }
     },
     Mutation: {
-        login: async (parent, args) => {
-            const user = await User.findOne({ $or: [{ username: args.username }, { email: args.email }] });
+        login: async (parent, { email, password }) => {
+            //const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
+            const user = await User.findOne( { email: email} )
 
             if(!user) {
                 throw new AuthenticationError("can't find this user");
             }
 
-            const correctPw = await user.isCorrectPassword(args.password);
+            const correctPw = await user.isCorrectPassword(password);
             if (!correctPw){
                 throw new AuthenticationError("Wrong password");
             }
@@ -30,15 +31,15 @@ const resolvers = {
             return { token, user };
         },
 
-        addUser: async ( parent, args ) => {
-            const user = await User.create(args);
+        addUser: async ( parent, { username, email, password } ) => {
+            const user = await User.create({ username, email, password});
             const token = signToken(user);
             return { token, user };
         },
 
         saveBook: async ( parent, { user, body } ) => {
             const updateUser = await User.findOneAndUpdate(
-                {_id: user.id},
+                {_id: user._id},
                 {$addToSet: { saveBooks: body}},
                 {new: true, runValidators: true}
             );
