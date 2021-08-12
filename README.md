@@ -1,4 +1,4 @@
-# Note Taker
+# MERN book search engine
 ![mit](https://img.shields.io/badge/license-mit-green?style=plastic)
 ## Descriptions 
 Refactor a fully functioning google boos API search engine, replace it's RESTful API with a GraphQl API built with Apollo server. 
