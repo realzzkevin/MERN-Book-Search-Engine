@@ -1,20 +1,20 @@
-const { Book, User } = require('../models');
+const { User } = require('../models');
 const { AuthenticationError } = require('apollo-server-express');
 const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
         me: async (parent, args, context) => {
-            console.log('this is query me and context'+context);
-            if(context.user) {
-                return User.findOne({ _id: context.user._id});//.populate('savedBooks');
+
+            if (context.user) {
+                return User.findOne({ _id: context.user._id });
             }
             throw new AuthenticationError('Cannot find a user with this id!');
         }
     },
     Mutation: {
         login: async (parent, { email, password }) => {
-            //const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
+
             const user = await User.findOne({ email: email })
 
             if (!user) {
@@ -50,7 +50,7 @@ const resolvers = {
         },
 
         removeBook: async (parent, { bookId }, context) => {
-            
+
             if (context.user) {
                 const updatedUser = await User.findOneAndUpdate(
                     { _id: context.user._id },
